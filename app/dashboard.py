@@ -140,7 +140,13 @@ def get_model_and_ledger():
 
     artifact = load_artifact(model_path)
     ledger_df = pd.read_csv(ledger_path)
+    # Precompute internal date series once to avoid repeated conversions
+    ledger_df["_b_date"] = pd.to_datetime(ledger_df["booking_date"]).dt.date
+    ledger_df["_a_date"] = pd.to_datetime(ledger_df["arrival_date"]).dt.date
+    ledger_df["_d_date"] = pd.to_datetime(ledger_df["departure_date"]).dt.date
+    ledger_df["_c_date"] = pd.to_datetime(ledger_df["cancellation_date"]).dt.date
     realized_occ = compute_daily_realized_occupancy(ledger_df)
+    ledger_df.attrs["realized_occ_df"] = realized_occ
     return artifact, ledger_df, realized_occ
 
 
@@ -222,16 +228,22 @@ st.markdown(
 # Tab Navigation
 tabs = st.tabs(["📈 Operational Forecast", "🔥 Occupancy Heatmap", "📊 Model Performance", "🛡️ Responsible AI & Model Card"])
 
-# Compute Forecasts
-with st.spinner("Generating point-in-time forecasts and conformal intervals..."):
-    forecast_results = predict_horizon(
-        origin_date=origin_date,
-        horizon_days=horizon_days,
-        room_categories=selected_categories if selected_categories else all_categories,
+@st.cache_data(show_spinner=False)
+def get_cached_forecast(origin_date_str: str, horizon: int, categories: tuple[str, ...]):
+    """Cached forecast generation for instant UI responsiveness."""
+    return predict_horizon(
+        origin_date=origin_date_str,
+        horizon_days=horizon,
+        room_categories=list(categories) if categories else all_categories,
         ledger_df=ledger_df,
         artifact=artifact,
     )
-    fc_df = pd.DataFrame(forecast_results)
+
+
+# Compute Forecasts (sub-second execution + instant cache hits)
+cats_tuple = tuple(selected_categories) if selected_categories else tuple(all_categories)
+forecast_results = get_cached_forecast(str(origin_date), horizon_days, cats_tuple)
+fc_df = pd.DataFrame(forecast_results)
 
 # TAB 1: OPERATIONAL FORECAST
 with tabs[0]:

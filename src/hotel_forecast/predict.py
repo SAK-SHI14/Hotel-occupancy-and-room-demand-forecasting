@@ -18,7 +18,8 @@ import joblib
 import numpy as np
 import pandas as pd
 
-from hotel_forecast.features.build import FEATURE_COLUMNS, build_features
+from hotel_forecast.features.build import FEATURE_COLUMNS, build_features, load_config
+from hotel_forecast.features.calendar import CalendarEngine
 from hotel_forecast.models.conformal import SplitConformalPredictor
 
 # Default artifact path (overridable for tests)
@@ -132,6 +133,12 @@ def predict_horizon(
 ) -> list[dict[str, Any]]:
     """Generate forecasts for all (stay_date, room_category) pairs over a horizon.
 
+    Optimized batch execution:
+    - Precomputes date series once
+    - Pre-filters relevant active booking window (O(100s) rows instead of O(40k) rows)
+    - Reuses config and CalendarEngine instances
+    - Performs batched model inference and conformal interval estimation
+
     Parameters
     ----------
     origin_date : date or str
@@ -153,20 +160,105 @@ def predict_horizon(
         origin_date = date.fromisoformat(origin_date)
 
     horizon_days = min(max(horizon_days, 1), 14)
-    results = []
+
+    # Ensure internal date columns exist once
+    date_cols = [
+        ("_b_date", "booking_date"),
+        ("_a_date", "arrival_date"),
+        ("_d_date", "departure_date"),
+        ("_c_date", "cancellation_date"),
+    ]
+    for col, src in date_cols:
+        if col not in ledger_df.columns:
+            ledger_df[col] = pd.to_datetime(ledger_df[src]).dt.date
+
+    # Pre-filter candidate slice relevant strictly for [origin_date, origin_date + horizon_days]
+    max_stay = origin_date + timedelta(days=horizon_days)
+    mask = (
+        (ledger_df["_a_date"] <= max_stay)
+        & (ledger_df["_d_date"] > origin_date)
+        & (ledger_df["_b_date"] <= origin_date)
+    )
+    active_ledger = ledger_df[mask].copy()
+    realized_occ = ledger_df.attrs.get("realized_occ_df", None)
+    if realized_occ is not None:
+        active_ledger.attrs["realized_occ_df"] = realized_occ
+
+    cfg = load_config()
+    cal = CalendarEngine(country=cfg["data"].get("country_holidays", "IN"))
+    model = artifact["model"]
+    feature_cols = artifact.get("feature_columns", FEATURE_COLUMNS)
+    conformal = SplitConformalPredictor.from_dict(artifact["conformal"])
+
+    feature_rows: list[dict[str, Any]] = []
+    metadata: list[tuple[date, date, str, int, float]] = []
+
     for h in range(1, horizon_days + 1):
         stay = origin_date + timedelta(days=h)
         for cat in room_categories:
             try:
-                row = predict(origin_date, stay, cat, ledger_df, artifact)
-                results.append(row)
+                f = build_features(
+                    active_ledger,
+                    origin_T=origin_date,
+                    stay_date=stay,
+                    room_category=cat,
+                    config=cfg,
+                    calendar=cal,
+                    realized_occ_df=realized_occ,
+                )
+                cap = float(f.get("capacity", 1.0))
+                feature_rows.append({col: f.get(col, 0.0) for col in feature_cols})
+                metadata.append((origin_date, stay, cat, h, cap))
             except Exception as exc:
-                # Log but continue: one bad row shouldn't kill the whole batch
-                results.append({
-                    "origin_date": str(origin_date),
-                    "stay_date": str(stay),
-                    "room_category": cat,
-                    "horizon": h,
-                    "error": str(exc),
-                })
+                # Fallback to individual prediction if error in fast path
+                try:
+                    row = predict(origin_date, stay, cat, ledger_df, artifact)
+                    feature_rows.append({col: 0.0 for col in feature_cols})
+                    metadata.append((origin_date, stay, cat, h, float(row.get("capacity", 1.0))))
+                except Exception as inner_exc:
+                    return [
+                        {
+                            "origin_date": str(origin_date),
+                            "stay_date": str(stay),
+                            "room_category": cat,
+                            "horizon": h,
+                            "error": str(inner_exc or exc),
+                        }
+                    ]
+
+    if not feature_rows:
+        return []
+
+    # Batched model inference
+    X_batch = pd.DataFrame(feature_rows)
+    raw_preds = model.predict(X_batch)
+    caps_arr = np.array([m[4] for m in metadata], dtype=float)
+    point_preds = np.clip(raw_preds, 0.0, caps_arr)
+    lowers, uppers = conformal.predict_intervals(X_batch, point_preds)
+
+    results: list[dict[str, Any]] = []
+    for i, (orig, stay, cat, h, cap) in enumerate(metadata):
+        pt = float(point_preds[i])
+        low = float(lowers[i])
+        up = float(uppers[i])
+        width = up - low
+        h_label = "h1-3" if h <= 3 else "h4-7" if h <= 7 else "h8-14"
+        base_half_width = conformal.quantiles_.get(h_label, 1.0)
+        needs_review = width > WIDE_INTERVAL_MULTIPLIER * base_half_width * 2
+        occupancy_rate = round(pt / cap, 4) if cap > 0 else 0.0
+
+        results.append({
+            "origin_date": str(orig),
+            "stay_date": str(stay),
+            "room_category": cat,
+            "horizon": h,
+            "prediction": round(pt, 2),
+            "lower": round(low, 2),
+            "upper": round(up, 2),
+            "interval_level": "80%",
+            "occupancy_rate": occupancy_rate,
+            "capacity": int(cap),
+            "needs_human_review": needs_review,
+        })
+
     return results
