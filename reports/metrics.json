@@ -1,0 +1,73 @@
+{
+  "best_model": "HistGBM (lr=0.05, d=8, leaf=20)",
+  "validation_metrics": {
+    "mae": 1.224,
+    "rmse": 1.7321,
+    "wape": 0.0935,
+    "wape_pct": 9.35,
+    "bias": -0.026,
+    "total_business_cost": 15239.38,
+    "mean_business_cost": 2.4739,
+    "skill_score_vs_b1": 0.7055
+  },
+  "b1_baseline_val": {
+    "mae": 4.1558,
+    "rmse": 5.3895,
+    "wape": 0.3176,
+    "wape_pct": 31.76,
+    "bias": 0.3084,
+    "total_business_cost": 49300.0,
+    "mean_business_cost": 8.0032
+  },
+  "b2_baseline_val": {
+    "mae": 3.3985,
+    "rmse": 4.4143,
+    "wape": 0.2597,
+    "wape_pct": 25.97,
+    "bias": 0.7304,
+    "total_business_cost": 37371.0,
+    "mean_business_cost": 6.0667,
+    "skill_score_vs_b1": 0.1822
+  },
+  "conformal_quantiles": {
+    "h1-3": 0.7406040968687653,
+    "h4-7": 1.7119690126661224,
+    "h8-14": 2.6509503966335264
+  },
+  "test_evaluation": {
+    "timestamp": "2026-11-15T19:15:49.332888",
+    "test_origin_start": "2025-08-11",
+    "test_origin_end": "2026-02-17",
+    "test_sample_count": 10696,
+    "model_type": "HistGradientBoostingRegressor",
+    "model_metrics": {
+      "mae": 1.5082,
+      "rmse": 2.1379,
+      "wape": 0.1001,
+      "wape_pct": 10.01,
+      "bias": -0.0918,
+      "total_business_cost": 33243.95,
+      "mean_business_cost": 3.1081,
+      "skill_score_vs_b1": 0.6774
+    },
+    "b1_naive_metrics": {
+      "mae": 4.6744,
+      "rmse": 6.099,
+      "wape": 0.3104,
+      "wape_pct": 31.04,
+      "bias": -0.3838,
+      "total_business_cost": 104099.0,
+      "mean_business_cost": 9.7325
+    },
+    "b2_moving_avg_metrics": {
+      "mae": 3.8379,
+      "rmse": 4.9999,
+      "wape": 0.2548,
+      "wape_pct": 25.48,
+      "bias": -0.7794,
+      "total_business_cost": 90436.5,
+      "mean_business_cost": 8.4552,
+      "skill_score_vs_b1": 0.179
+    }
+  }
+}

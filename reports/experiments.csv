@@ -1,0 +1,12 @@
+model_family,model_name,hyperparameters,mae,rmse,wape,wape_pct,bias,total_business_cost,mean_business_cost,skill_score_vs_b1
+Baseline,B1 Seasonal Naive,None (lag_same_weekday),4.1558,5.3895,0.3176,31.76,0.3084,49300.0,8.0032,
+Baseline,B2 Seasonal Moving Avg,None (4-week same-weekday mean),3.3985,4.4143,0.2597,25.97,0.7304,37371.0,6.0667,0.1822
+M1 Ridge Regression,Ridge (alpha=0.1),alpha=0.1,1.4812,2.102,0.1132,11.32,-0.0255,18405.76,2.9879,0.6436
+M1 Ridge Regression,Ridge (alpha=1.0),alpha=1.0,1.4812,2.102,0.1132,11.32,-0.0255,18405.55,2.9879,0.6436
+M1 Ridge Regression,Ridge (alpha=10.0),alpha=10.0,1.481,2.102,0.1132,11.32,-0.0255,18403.4,2.9876,0.6436
+M1 Ridge Regression,Ridge (alpha=100.0),alpha=100.0,1.4793,2.1021,0.113,11.3,-0.0251,18380.03,2.9838,0.644
+M2 Random Forest,"RandomForest (n=100, d=10)","n_estimators=100, max_depth=10",1.3733,1.9978,0.1049,10.49,-0.0058,16954.61,2.7524,0.6696
+M2 Random Forest,"RandomForest (n=150, d=15)","n_estimators=150, max_depth=15",1.389,2.0113,0.1061,10.61,0.0078,17064.04,2.7701,0.6658
+M3 Gradient Boosting,"HistGBM (lr=0.05, d=8, leaf=20)","learning_rate=0.05, max_depth=8, min_samples_leaf=20",1.3618,1.9522,0.1041,10.41,-0.065,17177.7,2.7886,0.6723
+M3 Gradient Boosting,"HistGBM (lr=0.1, d=10, leaf=15)","learning_rate=0.1, max_depth=10, min_samples_leaf=15",1.3893,1.9875,0.1062,10.62,-0.1233,17875.45,2.9019,0.6657
+M3 Gradient Boosting,"HistGBM (lr=0.1, d=8, leaf=25)","learning_rate=0.1, max_depth=8, min_samples_leaf=25",1.3994,1.998,0.1069,10.69,-0.1108,17922.86,2.9096,0.6633

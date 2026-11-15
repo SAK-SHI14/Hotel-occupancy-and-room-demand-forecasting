@@ -1,0 +1,25 @@
+{
+  "target_coverage": 0.8,
+  "overall_coverage": 0.71484375,
+  "overall_mean_width": 3.8629807292960536,
+  "buckets": {
+    "h1-3": {
+      "n": 1152,
+      "coverage": 0.7239583333333334,
+      "mean_width": 1.4522803921394976,
+      "quantile_halfwidth": 0.7406040968687653
+    },
+    "h4-7": {
+      "n": 1536,
+      "coverage": 0.720703125,
+      "mean_width": 3.3596931206264222,
+      "quantile_halfwidth": 1.7119690126661224
+    },
+    "h8-14": {
+      "n": 2688,
+      "coverage": 0.7075892857142857,
+      "mean_width": 5.183730935888653,
+      "quantile_halfwidth": 2.6509503966335264
+    }
+  }
+}

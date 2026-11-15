@@ -1,0 +1,49 @@
+project:
+  name: "hotel-demand-forecasting"
+  seed: 42
+
+hotel:
+  categories:
+    Standard:
+      capacity: 50
+      base_adr: 2500.0
+    Deluxe:
+      capacity: 35
+      base_adr: 4200.0
+    Suite:
+      capacity: 15
+      base_adr: 8500.0
+    Family:
+      capacity: 20
+      base_adr: 5500.0
+  total_capacity: 120
+
+data:
+  start_date: "2023-01-01"
+  end_date: "2026-03-01"
+  target_bookings: 35000
+  country_holidays: "IN"
+  noise_rate: 0.015
+
+splits:
+  train_ratio: 0.60
+  val_ratio: 0.20
+  test_ratio: 0.20
+  purge_gap_days: 14
+
+forecast:
+  horizon_days: 14
+  origin_eval_frequency_days: 1
+
+metrics:
+  asymmetric_cost:
+    c_under: 3.0
+    c_over: 1.0
+  conformal:
+    confidence_level: 0.80
+    grouping: "horizon_bucket"
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  uncertainty_review_threshold: 0.40

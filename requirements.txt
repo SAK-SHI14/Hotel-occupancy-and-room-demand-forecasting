@@ -1,0 +1,28 @@
+# Core numerical and data processing
+numpy>=1.26.0,<2.3.0
+pandas>=2.2.0,<3.0.0
+scipy>=1.13.0,<1.16.0
+
+# Machine learning & modeling
+scikit-learn>=1.5.0,<1.7.0
+joblib>=1.4.0
+shap>=0.45.0
+
+# Calendar & domain dependencies
+holidays>=0.60
+pyyaml>=6.0.1
+
+# API & validation
+pydantic>=2.7.0
+fastapi>=0.111.0
+uvicorn>=0.30.0
+requests>=2.31.0
+
+# Operational Dashboard & visualization
+streamlit>=1.35.0
+matplotlib>=3.8.0
+seaborn>=0.13.0
+
+# Developer tooling, testing & linting
+pytest>=8.0.0
+ruff>=0.4.0

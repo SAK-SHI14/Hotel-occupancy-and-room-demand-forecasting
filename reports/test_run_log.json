@@ -1,0 +1,38 @@
+[
+  {
+    "timestamp": "2026-11-15T19:15:49.332888",
+    "test_origin_start": "2025-08-11",
+    "test_origin_end": "2026-02-17",
+    "test_sample_count": 10696,
+    "model_type": "HistGradientBoostingRegressor",
+    "model_metrics": {
+      "mae": 1.5082,
+      "rmse": 2.1379,
+      "wape": 0.1001,
+      "wape_pct": 10.01,
+      "bias": -0.0918,
+      "total_business_cost": 33243.95,
+      "mean_business_cost": 3.1081,
+      "skill_score_vs_b1": 0.6774
+    },
+    "b1_naive_metrics": {
+      "mae": 4.6744,
+      "rmse": 6.099,
+      "wape": 0.3104,
+      "wape_pct": 31.04,
+      "bias": -0.3838,
+      "total_business_cost": 104099.0,
+      "mean_business_cost": 9.7325
+    },
+    "b2_moving_avg_metrics": {
+      "mae": 3.8379,
+      "rmse": 4.9999,
+      "wape": 0.2548,
+      "wape_pct": 25.48,
+      "bias": -0.7794,
+      "total_business_cost": 90436.5,
+      "mean_business_cost": 8.4552,
+      "skill_score_vs_b1": 0.179
+    }
+  }
+]

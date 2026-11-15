@@ -1,0 +1,38 @@
+{
+  "prediction": 18.94,
+  "occupancy_rate": 0.379,
+  "top_drivers": [
+    {
+      "feature": "otb_rooms_T",
+      "label": "rooms already on-the-books (non-cancelled as of forecast date)",
+      "value": 19.0,
+      "direction": "\u2193 suppressing demand"
+    },
+    {
+      "feature": "horizon",
+      "label": "forecast horizon (days ahead from the forecast date)",
+      "value": 1.0,
+      "direction": "\u2191 boosting demand"
+    },
+    {
+      "feature": "is_event_period",
+      "label": "whether a local event is active on the stay date",
+      "value": 0.0,
+      "direction": "\u2193 suppressing demand"
+    },
+    {
+      "feature": "same_weekday_4w_mean",
+      "label": "4-week same-weekday average occupancy",
+      "value": 19.0,
+      "direction": "\u2191 boosting demand"
+    },
+    {
+      "feature": "rolling_mean_28d",
+      "label": "28-day rolling mean of past occupancy",
+      "value": 22.714,
+      "direction": "\u2191 boosting demand"
+    }
+  ],
+  "explanation": "Forecast: 18.9 rooms occupied for Standard (1 day ahead). Occupancy rate: 37.9% of 50 total rooms. Currently 19 rooms are on-the-books. The stay falls on a Saturday (weekend). Top drivers: otb_rooms_T=19.0, horizon=1.0, is_event_period=0.0.",
+  "needs_human_review": false
+}

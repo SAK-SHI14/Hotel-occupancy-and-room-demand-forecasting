@@ -1,0 +1,63 @@
+{
+  "model_name": "HistGBM (lr=0.05, d=8, leaf=20)",
+  "model_type": "HistGradientBoostingRegressor",
+  "task": "Regression \u2014 hotel room demand forecasting",
+  "prediction_unit": "(stay_date, room_category)",
+  "target": "occupied_room_nights",
+  "forecast_horizons": "1 to 14 days",
+  "feature_count": 23,
+  "training_samples": 24640,
+  "train_period": {
+    "start": "2023-02-15",
+    "end": "2024-12-04"
+  },
+  "val_period": {
+    "start": "2024-12-20",
+    "end": "2025-07-26"
+  },
+  "training_date": "2026-11-15T19:07:56.974456",
+  "data_hash": "b55ddae47ff72550",
+  "val_metrics": {
+    "mae": 1.224,
+    "rmse": 1.7321,
+    "wape": 0.0935,
+    "wape_pct": 9.35,
+    "bias": -0.026,
+    "total_business_cost": 15239.38,
+    "mean_business_cost": 2.4739,
+    "skill_score_vs_b1": 0.7055
+  },
+  "b1_baseline_val": {
+    "mae": 4.1558,
+    "rmse": 5.3895,
+    "wape": 0.3176,
+    "wape_pct": 31.76,
+    "bias": 0.3084,
+    "total_business_cost": 49300.0,
+    "mean_business_cost": 8.0032
+  },
+  "b2_baseline_val": {
+    "mae": 3.3985,
+    "rmse": 4.4143,
+    "wape": 0.2597,
+    "wape_pct": 25.97,
+    "bias": 0.7304,
+    "total_business_cost": 37371.0,
+    "mean_business_cost": 6.0667,
+    "skill_score_vs_b1": 0.1822
+  },
+  "conformal_coverage_target": "80%",
+  "conformal_quantiles_per_bucket": {
+    "h1-3": 0.7406040968687653,
+    "h4-7": 1.7119690126661224,
+    "h8-14": 2.6509503966335264
+  },
+  "intended_use": "Decision-support tool for hotel operations managers. Outputs are probabilistic estimates, not guarantees.",
+  "limitations": [
+    "Trained on synthetic data \u2014 real-world performance may differ.",
+    "Demand shocks (pandemics, sudden events) beyond the training distribution may degrade accuracy.",
+    "Interval coverage may drift if booking patterns change significantly.",
+    "No PII processed \u2014 data is entirely synthetic and aggregated."
+  ],
+  "responsible_ai_notes": "Wide intervals (> 2x mean) trigger a 'needs_human_review' flag in the API. Tool is advisory; final decisions are human-made."
+}
