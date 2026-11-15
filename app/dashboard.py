@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
 import streamlit as st
+from matplotlib.colors import LinearSegmentedColormap
 
 from hotel_forecast.features.build import compute_daily_realized_occupancy
 from hotel_forecast.predict import load_artifact, predict_horizon
@@ -31,14 +32,93 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom Styling
+# Custom Styling - Warm Beige and Sky Blue Palette
 st.markdown(
     """
     <style>
-    .main-header { font-size: 1.8rem; font-weight: 700; color: #1E3A8A; margin-bottom: 0.2rem; }
-    .sub-header { font-size: 1.0rem; color: #4B5563; margin-bottom: 1.5rem; }
-    .metric-card { background-color: #F3F4F6; padding: 1rem; border-radius: 8px; border-left: 4px solid #3B82F6; }
-    .alert-card { background-color: #FEF2F2; padding: 1rem; border-radius: 8px; border-left: 4px solid #EF4444; }
+    /* Global background */
+    .stApp {
+        background-color: #FDFBF7;
+    }
+
+    /* Header typography */
+    .main-header {
+        font-size: 2.0rem;
+        font-weight: 700;
+        color: #0369A1; /* Deep Sky Blue */
+        margin-bottom: 0.2rem;
+        letter-spacing: -0.01em;
+    }
+    .sub-header {
+        font-size: 1.05rem;
+        color: #57534E; /* Warm Stone / Taupe */
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #E0F2FE; /* Sky Blue accent border */
+    }
+
+    /* Metric Cards */
+    div[data-testid="stMetric"] {
+        background-color: #F5EFEB; /* Warm sand beige */
+        border: 1px solid #BAE6FD; /* Sky Blue border */
+        border-left: 5px solid #0284C7; /* Sky blue accent */
+        padding: 0.8rem 1rem;
+        border-radius: 10px;
+        box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+    }
+    div[data-testid="stMetric"] label {
+        color: #57534E !important;
+        font-weight: 600;
+    }
+    div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+        color: #0369A1 !important;
+    }
+
+    /* Custom cards */
+    .metric-card {
+        background-color: #F5EFEB;
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 4px solid #0284C7;
+        box-shadow: 0 1px 3px rgba(2, 132, 199, 0.08);
+    }
+    .alert-card {
+        background-color: #FEF3C7;
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 4px solid #D97706;
+    }
+
+    /* Sidebar Styling */
+    section[data-testid="stSidebar"] {
+        background-color: #F5EFEB;
+        border-right: 1px solid #E2D9CF;
+    }
+    section[data-testid="stSidebar"] .stMarkdown h1,
+    section[data-testid="stSidebar"] .stMarkdown h2,
+    section[data-testid="stSidebar"] .stMarkdown h3 {
+        color: #0369A1;
+    }
+
+    /* Tabs Styling */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: #F5EFEB;
+        padding: 6px 8px;
+        border-radius: 10px;
+        border: 1px solid #E2D9CF;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 6px;
+        color: #57534E;
+        font-weight: 600;
+        padding: 8px 16px;
+    }
+    .stTabs [aria-selected="true"] {
+        background-color: #0284C7 !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 2px 4px rgba(2, 132, 199, 0.25);
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -186,12 +266,18 @@ with tabs[0]:
         # Plot Forecast Curves with Confidence Intervals
         st.subheader("14-Day Demand Trajectory with 80% Conformal Prediction Intervals")
         fig, ax = plt.subplots(figsize=(12, 5))
+        fig.patch.set_facecolor("#FDFBF7")
+        ax.set_facecolor("#FFFFFF")
+        ax.spines["top"].set_visible(False)
+        ax.spines["right"].set_visible(False)
+        ax.spines["left"].set_color("#CBD5E1")
+        ax.spines["bottom"].set_color("#CBD5E1")
 
         category_colors = {
-            "Standard": "#2563EB",
-            "Deluxe": "#059669",
-            "Family": "#D97706",
-            "Suite": "#7C3AED",
+            "Standard": "#0284C7",  # Sky Blue
+            "Deluxe": "#0891B2",    # Deep Ocean Cyan
+            "Family": "#D97706",    # Warm Sand / Amber
+            "Suite": "#6366F1",     # Indigo Slate
         }
 
         for cat in selected_categories:
@@ -208,14 +294,14 @@ with tabs[0]:
                 marker="o",
                 label=f"{cat} (Forecast)",
                 color=color,
-                linewidth=2,
+                linewidth=2.2,
             )
             ax.fill_between(
                 cat_data["stay_date_dt"],
                 cat_data["lower"],
                 cat_data["upper"],
                 color=color,
-                alpha=0.15,
+                alpha=0.18,
                 label=f"{cat} 80% Interval",
             )
 
@@ -239,10 +325,17 @@ with tabs[0]:
                     label=f"{cat} (Realized Actual)",
                 )
 
-        ax.set_xlabel("Stay Date", fontsize=11, fontweight="bold")
-        ax.set_ylabel("Occupied Room Nights", fontsize=11, fontweight="bold")
-        ax.grid(True, linestyle=":", alpha=0.6)
-        ax.legend(bbox_to_anchor=(1.02, 1), loc="upper left", frameon=True)
+        ax.set_xlabel("Stay Date", fontsize=11, fontweight="bold", color="#1E293B")
+        ax.set_ylabel("Occupied Room Nights", fontsize=11, fontweight="bold", color="#1E293B")
+        ax.tick_params(colors="#475569")
+        ax.grid(True, linestyle=":", alpha=0.6, color="#CBD5E1")
+        ax.legend(
+            bbox_to_anchor=(1.02, 1),
+            loc="upper left",
+            frameon=True,
+            facecolor="#FDFBF7",
+            edgecolor="#BAE6FD",
+        )
         plt.xticks(rotation=45)
         plt.tight_layout()
         st.pyplot(fig)
@@ -271,26 +364,36 @@ with tabs[1]:
     if not fc_df.empty:
         pivot_occ = fc_df.pivot(index="room_category", columns="stay_date", values="occupancy_rate") * 100
         fig_heat, ax_heat = plt.subplots(figsize=(12, 4))
+        fig_heat.patch.set_facecolor("#FDFBF7")
+        ax_heat.set_facecolor("#FDFBF7")
+
+        # Custom Beige-to-Sky-Blue gradient colormap
+        beige_skyblue_cmap = LinearSegmentedColormap.from_list(
+            "beige_skyblue",
+            ["#F5EFEB", "#E0F2FE", "#7DD3FC", "#38BDF8", "#0284C7", "#0369A1"],
+        )
         sns.heatmap(
             pivot_occ,
             annot=True,
             fmt=".1f",
-            cmap="YlOrRd",
+            cmap=beige_skyblue_cmap,
             vmin=0,
             vmax=100,
             cbar_kws={"label": "Occupancy Rate (%)"},
             ax=ax_heat,
-            linewidths=0.5,
+            linewidths=1.0,
+            linecolor="#FDFBF7",
         )
-        ax_heat.set_xlabel("Stay Date", fontsize=11, fontweight="bold")
-        ax_heat.set_ylabel("Room Category", fontsize=11, fontweight="bold")
+        ax_heat.set_xlabel("Stay Date", fontsize=11, fontweight="bold", color="#1E293B")
+        ax_heat.set_ylabel("Room Category", fontsize=11, fontweight="bold", color="#1E293B")
+        ax_heat.tick_params(colors="#475569")
         plt.xticks(rotation=45)
         plt.tight_layout()
         st.pyplot(fig_heat)
         plt.close(fig_heat)
 
         st.caption(
-            "💡 **Interpretation:** Cells in dark orange/red (>80%) indicate high occupancy pressure where "
+            "💡 **Interpretation:** Cells in dark sky blue (>80%) indicate high occupancy pressure where "
             "overbooking thresholds should be strictly enforced and discount rates closed."
         )
 
